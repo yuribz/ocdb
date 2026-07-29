@@ -35,61 +35,28 @@
         </section>
     </div>
 
-    <div id="new-character-modal" class="modal-overlay" hidden>
-        <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="new-character-title">
-            <button type="button" class="modal-close" id="new-character-close" aria-label="Close">&times;</button>
-            <h2 id="new-character-title">New Character</h2>
-
-            <form id="new-character-form" class="upload-form">
-                <label for="new-character-name">Name</label>
-                <input type="text" id="new-character-name" name="name" required />
-
-                <label for="new-character-age">Age</label>
-                <input type="number" id="new-character-age" name="age" required />
-
-                <label for="new-character-birthday">Birthday</label>
-                <input type="date" id="new-character-birthday" name="birthday" />
-
-                <label for="new-character-gender">Gender</label>
-                <input type="text" id="new-character-gender" name="gender" required />
-
-                <label for="new-character-sexuality">Sexuality</label>
-                <input type="text" id="new-character-sexuality" name="sexuality" required />
-
-                <label for="new-character-nationality">Nationality</label>
-                <input type="text" id="new-character-nationality" name="nationality" />
-
-                <button type="submit">Create</button>
-                <p id="new-character-error" class="upload-error"></p>
-            </form>
-        </div>
-    </div>
-
+    <!-- One shell handles view, edit, and create for a character (see modal.js
+         createEntityModal). Field rows/inputs below are generated at runtime
+         from entity_schemas.js's characterSchema, not hand-written here. -->
     <div id="character-modal" class="modal-overlay" hidden>
-        <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="modal-character-name">
-            
+        <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="character-modal-title">
+
             <!-- Buttons at the top -->
-            <button type="button" class="modal-edit" id="character-modal-edit" aria-label="Edit">Edit</button>
-            <button type="button" class="modal-close" id="character-modal-close" aria-label="Close">&times;</button>
-            
-            <!-- Basic data -->
-            <h2 id="modal-character-name"></h2>
-            <div id="modal-cover-image" class="cover-image"></div>
-            <dl id="modal-character-details"></dl>
+            <button type="button" class="modal-edit" aria-label="Edit">Edit</button>
+            <button type="button" class="modal-close" aria-label="Close">&times;</button>
 
-            <!-- Edit form: hidden by default. See .modal-edit-form in style.css -->
-            <form id="modal-edit-form" class="modal-edit-form">
-            <label>Name
-                <input type="text" id="edit-name" />
-            </label>
-            <label>Age
-                <input type="number" id="edit-age" />
-            </label>
-            
-            <button type="submit">Save</button>
-            <button type="button" id="edit-cancel">Cancel</button>
+            <!-- View mode -->
+            <h2 class="modal-title" id="character-modal-title"></h2>
+            <div class="cover-image modal-cover-image"></div>
+            <dl class="modal-view"></dl>
+
+            <!-- Edit / create mode -->
+            <form class="modal-form">
+                <div class="modal-form-fields"></div>
+                <button type="submit">Save</button>
+                <button type="button" class="modal-cancel">Cancel</button>
+                <p class="modal-form-error upload-error"></p>
             </form>
-
 
             <section class="modal-gallery-section">
                 <h3>Gallery</h3>

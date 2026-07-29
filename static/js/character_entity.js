@@ -1,55 +1,41 @@
-import { getCharacter, getPronouns, getImages, uploadImage, deleteImageLink } from "./api.js";
-import { initModal } from "./modal.js";
+import { characters, images as imagesApi, pronouns as pronounsApi } from "./api.js";
+import { createEntityModal } from "./modal.js";
+import { characterSchema } from "./entity_schemas.js";
+import { loadCharacters } from "./character_list.js";
 
-const modal = document.getElementById("character-modal");
-const modalName = document.getElementById("modal-character-name");
-const modalDetails = document.getElementById("modal-character-details");
-const modalClose = document.getElementById("character-modal-close");
-const modalEdit = document.getElementById("character-modal-edit");
+const element = document.getElementById("character-modal");
 const uploadForm = document.getElementById("upload-form");
 
-const modalCtl = initModal(modal);
-
 let currentCharacterId = null;
-let isEdit = false;
+let lastFetchedCharacter = null;
+
+const modal = createEntityModal({
+    element,
+    schema: characterSchema,
+    client: characters,
+    onSaved: (fresh) => {
+        if (fresh) lastFetchedCharacter = fresh;
+        loadCharacters();
+    },
+});
 
 function formatPronoun(pronoun) {
     const base = `${pronoun.subject}/${pronoun.object}`;
     return pronoun.is_primary ? `${base} (primary)` : base;
 }
 
-function renderCharacterModal(character, pronouns) {
-    modalName.textContent = character.name;
-
-    const rows = [
-        ["Age", character.age],
-        ["Birthday", character.birthday ?? "Unknown"],
-        ["Gender", character.gender],
-        ["Sexuality", character.sexuality],
-        ["Nationality", character.nationality ?? "Unknown"],
-        [
-            "Pronouns",
-            pronouns.length ? pronouns.map(formatPronoun).join(", ") : "None set",
-        ],
-    ];
-
-    if (character.extra && Object.keys(character.extra).length > 0) {
-        rows.push(["Extra", JSON.stringify(character.extra)]);
-    }
-
-    modalDetails.innerHTML = "";
-    for (const [label, value] of rows) {
-        const dt = document.createElement("dt");
-        dt.textContent = label;
-        const dd = document.createElement("dd");
-        dd.textContent = value;
-        modalDetails.appendChild(dt);
-        modalDetails.appendChild(dd);
-    }
+function renderPronounsIntoView(pronouns) {
+    const view = element.querySelector(".modal-view");
+    const dt = document.createElement("dt");
+    dt.textContent = "Pronouns";
+    const dd = document.createElement("dd");
+    dd.textContent = pronouns.length ? pronouns.map(formatPronoun).join(", ") : "None set";
+    view.appendChild(dt);
+    view.appendChild(dd);
 }
 
 function renderCoverImage(images) {
-    const coverContainer = document.getElementById("modal-cover-image");
+    const coverContainer = element.querySelector(".modal-cover-image");
     coverContainer.innerHTML = "";
 
     const cover = images.find((image) => image.is_primary);
@@ -105,14 +91,14 @@ function renderImages(images) {
 
 async function refreshGallery() {
     if (!currentCharacterId) return;
-    renderImages(await getImages(currentCharacterId));
+    renderImages(await imagesApi.listForCharacter(currentCharacterId));
 }
 
 async function deleteImage(linkId) {
     if (!confirm("Remove this image from the gallery? (It's archived, not permanently erased, unless this was its only link.)")) {
         return;
     }
-    await deleteImageLink(linkId);
+    await imagesApi.deleteLink(linkId);
     await refreshGallery();
 }
 
@@ -124,7 +110,7 @@ async function handleUploadSubmit(event) {
     const uploadError = document.getElementById("upload-error");
     uploadError.textContent = "";
 
-    const response = await uploadImage(currentCharacterId, new FormData(form));
+    const response = await imagesApi.upload(currentCharacterId, new FormData(form));
 
     if (!response.ok) {
         const body = await response.json().catch(() => ({}));
@@ -138,25 +124,19 @@ async function handleUploadSubmit(event) {
 
 export async function openCharacterModal(id) {
     currentCharacterId = id;
-    const [character, pronouns, images] = await Promise.all([
-        getCharacter(id),
-        getPronouns(id),
-        getImages(id),
-    ]);
-
-    renderCharacterModal(character, pronouns);
-    renderImages(images);
-    modalCtl.open();
+    lastFetchedCharacter = await modal.openView(id);
+    const pronouns = await pronounsApi.listForCharacter(id);
+    renderPronounsIntoView(pronouns);
+    await refreshGallery();
 }
 
-modalEdit.addEventListener("click", () => {
-    if (isEdit) {
-        modalCtl.endEditing();
-        isEdit = false;
-    } else {
-        modalCtl.edit();
-        isEdit = true;
-    }
-});
-modalClose.addEventListener("click", modalCtl.close);
+export function openNewCharacterModal() {
+    currentCharacterId = null;
+    modal.openCreate();
+}
+
+document.getElementById("new-character-button").addEventListener("click", openNewCharacterModal);
+element.querySelector(".modal-close").addEventListener("click", modal.close);
+element.querySelector(".modal-edit").addEventListener("click", () => modal.enterEdit(lastFetchedCharacter));
+element.querySelector(".modal-cancel").addEventListener("click", () => modal.cancelEdit(lastFetchedCharacter));
 uploadForm.addEventListener("submit", handleUploadSubmit);

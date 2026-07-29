@@ -1,8 +1,8 @@
-import { getCharacters } from "./api.js";
-import { openCharacterModal } from "./character_modal.js";
+import { characters as charactersApi } from "./api.js";
+import { openCharacterModal } from "./character_entity.js";
 
 export async function loadCharacters() {
-    const characters = await getCharacters();
+    const characters = await charactersApi.list();
 
     const list = document.getElementById("character-list");
     list.innerHTML = "";

@@ -1,4 +1,4 @@
 import { loadCharacters } from "./character_list.js";
-import "./new_character.js";
+import "./character_entity.js";
 
 loadCharacters();

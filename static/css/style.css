@@ -199,8 +199,14 @@ pre {
   display: none;
 }
 
-.modal-overlay.editing .modal-edit-form { display: block; }
-.modal-overlay.editing #modal-character-details { display: none; }
+.modal-overlay.editing .modal-view,
+.modal-overlay.creating .modal-view { display: none; }
+
+/* Creating a new entity: there's no existing record yet, so hide the parts
+   of the shell that only make sense once one exists. */
+.modal-overlay.creating .modal-cover-image,
+.modal-overlay.creating .modal-gallery-section,
+.modal-overlay.creating .modal-edit { display: none; }
 
 .modal-box {
   position: relative;
@@ -227,7 +233,21 @@ pre {
   cursor: pointer;
 }
 
-.modal-edit-form { display: none; }
+.modal-form {
+  display: none;
+  flex-direction: column;
+  gap: 0.4rem;
+  text-align: left;
+}
+
+.modal-overlay.editing .modal-form,
+.modal-overlay.creating .modal-form { display: flex; }
+
+.modal-form-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
 
 .cover-image {
   text-align: center;
@@ -318,7 +338,8 @@ pre {
   text-align: left;
 }
 
-.upload-form label {
+.upload-form label,
+.modal-form-fields label {
   font-weight: bold;
   color: var(--accent);
 }

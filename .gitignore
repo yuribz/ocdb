@@ -2,3 +2,5 @@
 .env
 *.log
 /backups/
+CLAUDE.md
+NEXTSTEP.md
