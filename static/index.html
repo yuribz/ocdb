@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script>
+        (function () {
+            var theme = localStorage.getItem("ocdb-theme");
+            if (theme === "light" || theme === "dark") {
+                document.documentElement.setAttribute("data-theme", theme);
+            }
+        })();
+    </script>
+    <title>OCDB — Original Character Database</title>
+    <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body class="centered-parent">
+    <div class="theme-switcher">
+        <label for="theme-select">Theme:</label>
+        <select id="theme-select">
+            <option value="auto">Auto</option>
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
+        </select>
+    </div>
+
+    <div class="box">
+        <h1>OCDB</h1>
+        <p>Original Character Database</p>
+
+        <section id="characters">
+            <h2>Characters</h2>
+            <ul id="character-list" style="list-style-type: none; padding: 0;"></ul>
+            <button type="button" id="new-character-button">+ New Character</button>
+        </section>
+    </div>
+
+    <div id="new-character-modal" class="modal-overlay" hidden>
+        <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="new-character-title">
+            <button type="button" class="modal-close" id="new-character-close" aria-label="Close">&times;</button>
+            <h2 id="new-character-title">New Character</h2>
+
+            <form id="new-character-form" class="upload-form">
+                <label for="new-character-name">Name</label>
+                <input type="text" id="new-character-name" name="name" required />
+
+                <label for="new-character-age">Age</label>
+                <input type="number" id="new-character-age" name="age" required />
+
+                <label for="new-character-birthday">Birthday</label>
+                <input type="date" id="new-character-birthday" name="birthday" />
+
+                <label for="new-character-gender">Gender</label>
+                <input type="text" id="new-character-gender" name="gender" required />
+
+                <label for="new-character-sexuality">Sexuality</label>
+                <input type="text" id="new-character-sexuality" name="sexuality" required />
+
+                <label for="new-character-nationality">Nationality</label>
+                <input type="text" id="new-character-nationality" name="nationality" />
+
+                <button type="submit">Create</button>
+                <p id="new-character-error" class="upload-error"></p>
+            </form>
+        </div>
+    </div>
+
+    <div id="character-modal" class="modal-overlay" hidden>
+        <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="modal-character-name">
+            
+            <!-- Buttons at the top -->
+            <button type="button" class="modal-edit" id="character-modal-edit" aria-label="Edit">Edit</button>
+            <button type="button" class="modal-close" id="character-modal-close" aria-label="Close">&times;</button>
+            
+            <!-- Basic data -->
+            <h2 id="modal-character-name"></h2>
+            <div id="modal-cover-image" class="cover-image"></div>
+            <dl id="modal-character-details"></dl>
+
+            <!-- Edit form: hidden by default. See .modal-edit-form in style.css -->
+            <form id="modal-edit-form" class="modal-edit-form">
+            <label>Name
+                <input type="text" id="edit-name" />
+            </label>
+            <label>Age
+                <input type="number" id="edit-age" />
+            </label>
+            
+            <button type="submit">Save</button>
+            <button type="button" id="edit-cancel">Cancel</button>
+            </form>
+
+
+            <section class="modal-gallery-section">
+                <h3>Gallery</h3>
+                <div id="modal-image-gallery" class="gallery-grid"></div>
+
+                <form id="upload-form" class="upload-form">
+                    <label for="upload-file">Image</label>
+                    <input type="file" id="upload-file" name="file"
+                           accept="image/png,image/jpeg,image/webp,image/gif" required />
+
+                    <label for="upload-caption">Caption (optional)</label>
+                    <input type="text" id="upload-caption" name="caption" />
+
+                    <label for="upload-primary">
+                        <input type="checkbox" id="upload-primary" name="is_primary" value="true" />
+                        Set as cover image
+                    </label>
+
+                    <button type="submit">Upload</button>
+                    <p id="upload-error" class="upload-error"></p>
+                </form>
+            </section>
+        </div>
+    </div>
+
+    <script src="/js/theme.js"></script>
+    <script type="module" src="/js/app.js"></script>
+</body>
+</html>
