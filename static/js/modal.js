@@ -1,3 +1,5 @@
+import { errorMessageFrom } from "./api.js";
+
 export function initModal(element, { onClose } = {}) {
     function close() {
         element.hidden = true;
@@ -46,8 +48,7 @@ function queryModalElements(root) {
 }
 
 async function errorFromResponse(response) {
-    const body = await response.json().catch(() => ({}));
-    return new Error(body.error ?? "Save failed.");
+    return new Error(await errorMessageFrom(response, "Save failed."));
 }
 
 function inputIdFor(root, key) {
@@ -152,6 +153,7 @@ export function createEntityModal({ element, schema, client, onSaved }) {
         modalCtl.endEditing();
         modalCtl.endCreating();
         if (viewData) renderView(viewData);
+        else modalCtl.close();
     }
 
     async function handleSubmit(event) {

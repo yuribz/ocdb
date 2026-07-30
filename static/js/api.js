@@ -16,10 +16,17 @@ export class ApiError extends Error {
     }
 }
 
+// Shared by parseJsonOrThrow and by callers of the raw fetch()-returning
+// helpers below (create/update/upload) who need to read an error out of a
+// non-ok response without an ApiError getting thrown.
+export async function errorMessageFrom(response, fallback) {
+    const body = await response.json().catch(() => ({}));
+    return body.error ?? fallback;
+}
+
 async function parseJsonOrThrow(response) {
     if (!response.ok) {
-        const body = await response.json().catch(() => ({}));
-        throw new ApiError(body.error ?? `Request failed (${response.status})`, response.status);
+        throw new ApiError(await errorMessageFrom(response, `Request failed (${response.status})`), response.status);
     }
     return response.json();
 }
