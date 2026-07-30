@@ -30,13 +30,23 @@
 
         <section id="characters">
             <h2>Characters</h2>
-            <ul id="character-list" style="list-style-type: none; padding: 0;"></ul>
+            <input type="search" id="character-search" class="search-input"
+                   placeholder="Search characters..." aria-label="Search characters" />
+            <ul id="character-list" class="entity-list"></ul>
+            <p id="character-empty-state" class="empty-state" hidden>
+                No characters yet — add your first OC!
+            </p>
             <button type="button" id="new-character-button">+ New Character</button>
         </section>
 
         <section id="places">
             <h2>Places</h2>
-            <ul id="place-list" style="list-style-type: none; padding: 0;"></ul>
+            <input type="search" id="place-search" class="search-input"
+                   placeholder="Search places..." aria-label="Search places" />
+            <ul id="place-list" class="entity-list"></ul>
+            <p id="place-empty-state" class="empty-state" hidden>
+                No places yet — add your first location!
+            </p>
             <button type="button" id="new-place-button">+ New Place</button>
         </section>
     </div>
@@ -141,6 +151,20 @@
                 <button type="button" class="modal-cancel">Cancel</button>
                 <p class="modal-form-error upload-error"></p>
             </form>
+        </div>
+    </div>
+
+    <!-- Toasts are appended/removed here at runtime by js/toast.js. -->
+    <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+    <!-- Full-size viewer for a clicked gallery thumbnail. Same
+         overlay/Escape-to-close pattern as the entity modals (see
+         initModal in modal.js), driven by js/lightbox.js. -->
+    <div id="image-lightbox" class="lightbox-overlay" hidden>
+        <div class="lightbox-box">
+            <button type="button" class="lightbox-close" aria-label="Close">&times;</button>
+            <img class="lightbox-image" src="" alt="" />
+            <p class="lightbox-caption"></p>
         </div>
     </div>
 

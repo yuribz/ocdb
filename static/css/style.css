@@ -375,3 +375,222 @@ pre {
   cursor: pointer;
   padding: 0.1rem 0.4rem;
 }
+
+/* --- Search input ------------------------------------------------------ */
+
+.search-input {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  font-family: inherit;
+  font-size: 1rem;
+  color: var(--fg);
+  background-color: var(--bg);
+  border: 2px solid var(--accent);
+  border-radius: 4px;
+  padding: 0.4rem 0.6rem;
+  margin: 0.75rem 0;
+}
+
+.search-input::placeholder {
+  color: var(--fg);
+  opacity: 0.6;
+}
+
+/* --- Entity list / cards ------------------------------------------------ */
+
+.entity-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  text-align: left;
+}
+
+.entity-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  box-sizing: border-box;
+  background: none;
+  border: 2px solid var(--accent);
+  border-radius: 8px;
+  color: var(--fg);
+  font-family: inherit;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+}
+
+.entity-card:hover {
+  background-color: var(--accent);
+  color: var(--box-bg);
+}
+
+.entity-card:hover .entity-avatar {
+  color: var(--box-bg);
+}
+
+.entity-avatar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  font-weight: bold;
+  color: var(--fg);
+  background-color: hsl(var(--avatar-hue, 300) 70% 80%);
+}
+
+:root[data-theme="dark"] .entity-avatar {
+  background-color: hsl(var(--avatar-hue, 300) 45% 35%);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) .entity-avatar {
+    background-color: hsl(var(--avatar-hue, 300) 45% 35%);
+  }
+}
+
+.entity-card-details {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.entity-card-name {
+  font-weight: bold;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.entity-card-subtitle {
+  font-size: 0.8rem;
+  font-family: "Ubuntu Mono", monospace;
+  opacity: 0.8;
+}
+
+/* --- Empty state --------------------------------------------------------- */
+
+.empty-state {
+  border: 2px dashed var(--accent);
+  border-radius: 8px;
+  padding: 1rem;
+  margin: 0.75rem 0;
+  opacity: 0.85;
+}
+
+/* --- Skeleton loading state ---------------------------------------------- */
+
+.entity-card.skeleton {
+  cursor: default;
+  border-style: dashed;
+  height: 2.25rem;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--accent) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  opacity: 0.3;
+  animation: skeleton-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes skeleton-pulse {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* --- Toasts --------------------------------------------------------------- */
+
+.toast-container {
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  z-index: 20;
+}
+
+.toast {
+  font-family: "Ubuntu Mono", monospace;
+  font-size: 0.85rem;
+  color: var(--fg);
+  background-color: var(--box-bg);
+  border: 3px solid var(--accent);
+  border-radius: 6px;
+  padding: 0.6rem 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  opacity: 0;
+  transform: translateY(0.5rem);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.toast-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.toast-error {
+  border-color: crimson;
+}
+
+/* --- Lightbox --------------------------------------------------------------- */
+
+.lightbox-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 30;
+}
+
+.lightbox-overlay[hidden] {
+  display: none;
+}
+
+.lightbox-box {
+  position: relative;
+  max-width: 90vw;
+  max-height: 90vh;
+  text-align: center;
+}
+
+.lightbox-image {
+  max-width: 90vw;
+  max-height: 80vh;
+  width: auto;
+  border: 5px solid var(--accent);
+  border-radius: 8px;
+}
+
+.lightbox-caption {
+  color: white;
+  font-family: "Ubuntu Mono", monospace;
+  font-size: 0.85rem;
+  margin: 0.5rem 0 0;
+}
+
+.lightbox-close {
+  position: absolute;
+  top: -2.5rem;
+  right: 0;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 2rem;
+  line-height: 1;
+  cursor: pointer;
+}

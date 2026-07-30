@@ -4,6 +4,7 @@ import { places as placesApi } from "./api.js";
 import { createEntityModal } from "./modal.js";
 import { placesSchema } from "./entity_schemas.js";
 import { loadPlaces } from "./place_list.js";
+import { showToast } from "./toast.js";
 
 const element = /** @type {HTMLElement} */ (document.getElementById("place-modal"));
 
@@ -18,6 +19,7 @@ const modal = createEntityModal({
     onSaved: (fresh) => {
         if (fresh) lastFetchedPlace = fresh;
         loadPlaces();
+        showToast(fresh ? "Place updated." : "Place created.");
     },
 });
 
