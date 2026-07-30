@@ -1,0 +1,11 @@
+{
+  "name": "ocdb",
+  "version": "0.1.0",
+  "description": "OC database app",
+  "scripts": {
+    "typecheck": "tsc --noEmit -p jsconfig.json"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.2"
+  }
+}
