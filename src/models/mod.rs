@@ -3,3 +3,4 @@
 pub mod character;
 pub mod image;
 pub mod pronoun;
+pub mod place;
