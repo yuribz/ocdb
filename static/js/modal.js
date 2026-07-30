@@ -58,7 +58,7 @@ export function initModal(element, { onClose } = {}) {
 
 /**
  * @param {HTMLElement} root
- * @returns {Object} {title: HTMLElement, view: HTMLElement, form: HTMLFormElement, formFields: HTMLElement, formError: HTMLElement}
+ * @returns {{title: HTMLElement, view: HTMLElement, form: HTMLFormElement, formFields: HTMLElement, formError: HTMLElement}}
  */
 function queryModalElements(root) {
     return {
@@ -90,16 +90,25 @@ function inputIdFor(root, key) {
 }
 
 /**
+ * @typedef {Object} FieldOption
+ * @property {string} value
+ * @property {string} label
+ */
+
+/**
  * @typedef {Object} EntityModalController
  * @property {(id: string|number) => Promise<any>} openView - Load and display entity
- * @property {() => void} openCreate - Initialize create mode
- * @property {(data: any) => void} enterEdit - Enter edit mode with data
+ * @property {() => Promise<void>} openCreate - Initialize create mode
+ * @property {(data: any) => Promise<void>} enterEdit - Enter edit mode with data
  * @property {(viewData?: any) => void} cancelEdit - Exit edit mode
  * @property {() => void} close - Close modal
  */
 
+// A single reusable controller for an entity's view/edit/create modal, driven
+// entirely by a field schema. Knows nothing about entity-specific extras
+// (e.g. a character's image gallery or pronoun list) — those stay in the
+// caller, layered on top of openView()'s returned data.
 /**
- * Generic schema-driven modal controller for view/edit/create workflows.
  * @param {Object} opts
  * @param {HTMLElement} opts.element - Modal element
  * @param {import('./entity_schemas.js').Schema} opts.schema - Entity schema
@@ -138,22 +147,60 @@ export function createEntityModal({ element, schema, client, onSaved }) {
         }
     }
 
-    function renderForm(data) {
+    /**
+     * Resolve a select field's options, tolerating a failed async fetch by
+     * falling back to an empty option list rather than breaking form render.
+     * @param {import('./entity_schemas.js').Field} field
+     * @returns {Promise<FieldOption[]>}
+     */
+    async function resolveSelectOptions(field) {
+        if (typeof field.options !== "function") return field.options ?? [];
+        try {
+            return await field.options();
+        } catch {
+            return [];
+        }
+    }
+
+    /**
+     * @param {any} data
+     * @returns {Promise<void>}
+     */
+    async function renderForm(data) {
         els.formFields.innerHTML = "";
         for (const field of formFields()) {
             const label = document.createElement("label");
             label.textContent = field.label;
             label.htmlFor = inputIdFor(element, field.key);
 
-            const input = document.createElement("input");
-            input.type = field.type ?? "text";
-            input.id = inputIdFor(element, field.key);
-            input.name = field.key;
-            if (field.required) input.required = true;
             const existing = data?.[field.key];
-            if (existing !== undefined && existing !== null) input.value = existing;
 
-            label.appendChild(input);
+            if (field.type === "select") {
+                const select = document.createElement("select");
+                select.id = inputIdFor(element, field.key);
+                select.name = field.key;
+                if (field.required) select.required = true;
+
+                for (const opt of await resolveSelectOptions(field)) {
+                    const option = document.createElement("option");
+                    option.value = opt.value;
+                    option.textContent = opt.label;
+                    select.appendChild(option);
+                }
+                select.value = existing ?? "";
+
+                label.appendChild(select);
+            } else {
+                const input = document.createElement("input");
+                input.type = field.type ?? "text";
+                input.id = inputIdFor(element, field.key);
+                input.name = field.key;
+                if (field.required) input.required = true;
+                if (existing !== undefined && existing !== null) input.value = existing;
+
+                label.appendChild(input);
+            }
+
             els.formFields.appendChild(label);
         }
     }
@@ -167,6 +214,10 @@ export function createEntityModal({ element, schema, client, onSaved }) {
         return values;
     }
 
+    /**
+     * @param {string|number} id
+     * @returns {Promise<any>}
+     */
     async function openView(id) {
         mode = "view";
         currentId = id;
@@ -179,23 +230,34 @@ export function createEntityModal({ element, schema, client, onSaved }) {
         return data;
     }
 
-    function openCreate() {
+    /**
+     * @returns {Promise<void>}
+     */
+    async function openCreate() {
         mode = "create";
         currentId = null;
         els.formError.textContent = "";
         els.title.textContent = schema.title(null);
-        renderForm({});
+        await renderForm({});
         modalCtl.creating();
         modalCtl.open();
     }
 
-    function enterEdit(data) {
+    /**
+     * @param {any} data
+     * @returns {Promise<void>}
+     */
+    async function enterEdit(data) {
         mode = "edit";
         els.formError.textContent = "";
-        renderForm(data);
+        await renderForm(data);
         modalCtl.edit();
     }
 
+    /**
+     * @param {any} [viewData]
+     * @returns {void}
+     */
     function cancelEdit(viewData) {
         mode = "view";
         modalCtl.endEditing();

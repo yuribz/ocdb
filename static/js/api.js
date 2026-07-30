@@ -36,6 +36,11 @@ export class ApiError extends Error {
 // Shared by parseJsonOrThrow and by callers of the raw fetch()-returning
 // helpers below (create/update/upload) who need to read an error out of a
 // non-ok response without an ApiError getting thrown.
+/**
+ * @param {Response} response
+ * @param {string} fallback - Message to use if the response has no error field
+ * @returns {Promise<string>}
+ */
 export async function errorMessageFrom(response, fallback) {
     const body = await response.json().catch(() => ({}));
     return body.error ?? fallback;
@@ -83,9 +88,16 @@ export function createEntityClient({ basePath }) {
 
 export const characters = createEntityClient({ basePath: "/api/characters" });
 
+// Places aren't functional on the backend yet (no routes/migration), but the
+// client shape is the same uniform flat-CRUD-by-id resource as characters.
+export const places = createEntityClient({ basePath: "/api/places" });
+
 /**
  * @typedef {Object} PronounClient
  * @property {(characterId: string|number) => Promise<any>} listForCharacter - GET pronouns for character; returns parsed JSON
+ * @property {(payload: object) => Promise<Response>} create - POST new pronoun set; returns raw Response (check .ok)
+ * @property {(id: string|number, payload: object) => Promise<Response>} update - PUT pronoun set; returns raw Response (check .ok)
+ * @property {(id: string|number) => Promise<Response>} remove - DELETE pronoun set; returns raw Response (check .ok)
  */
 
 /**
@@ -99,11 +111,13 @@ export const characters = createEntityClient({ basePath: "/api/characters" });
 // POST /api/pronouns with character_id in the body; list is nested under the
 // character), so these stay hand-written rather than forced through a
 // generic nested-resource client.
-
 /** @type {PronounClient} */
 export const pronouns = {
     listForCharacter: (characterId) =>
         request(`/api/characters/${characterId}/pronouns`).then(parseJsonOrThrow),
+    create: (payload) => request("/api/pronouns", { method: "POST", json: payload }),
+    update: (id, payload) => request(`/api/pronouns/${id}`, { method: "PUT", json: payload }),
+    remove: (id) => request(`/api/pronouns/${id}`, { method: "DELETE" }),
 };
 
 /** @type {ImageClient} */

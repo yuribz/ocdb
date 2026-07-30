@@ -206,6 +206,7 @@ pre {
    of the shell that only make sense once one exists. */
 .modal-overlay.creating .modal-cover-image,
 .modal-overlay.creating .modal-gallery-section,
+.modal-overlay.creating .modal-pronouns-section,
 .modal-overlay.creating .modal-edit { display: none; }
 
 .modal-box {
@@ -282,7 +283,8 @@ pre {
   margin: 0;
 }
 
-.modal-gallery-section {
+.modal-gallery-section,
+.modal-pronouns-section {
   margin-top: 1.5rem;
   border-top: 2px solid var(--accent);
   padding-top: 1rem;
@@ -331,7 +333,8 @@ pre {
   padding: 0.1rem 0.4rem;
 }
 
-.upload-form {
+.upload-form,
+.pronoun-form {
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
@@ -339,6 +342,7 @@ pre {
 }
 
 .upload-form label,
+.pronoun-form label,
 .modal-form-fields label {
   font-weight: bold;
   color: var(--accent);
@@ -347,4 +351,27 @@ pre {
 .upload-error {
   color: crimson;
   margin: 0;
+}
+
+.pronoun-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0 0 0.75rem;
+}
+
+.pronoun-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.3rem;
+}
+
+.pronoun-list button {
+  font-family: inherit;
+  font-size: 0.75rem;
+  background: none;
+  border: 1px solid var(--accent);
+  color: var(--fg);
+  cursor: pointer;
+  padding: 0.1rem 0.4rem;
 }

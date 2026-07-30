@@ -5,9 +5,19 @@ import { createEntityModal } from "./modal.js";
 import { characterSchema } from "./entity_schemas.js";
 import { loadCharacters } from "./character_list.js";
 
-/** @type {HTMLElement} */
-const element = document.getElementById("character-modal");
-const uploadForm = document.getElementById("upload-form");
+const element = /** @type {HTMLElement} */ (document.getElementById("character-modal"));
+const uploadForm = /** @type {HTMLFormElement} */ (document.getElementById("upload-form"));
+const pronounForm = /** @type {HTMLFormElement} */ (document.getElementById("pronoun-form"));
+const pronounFormId = /** @type {HTMLInputElement} */ (document.getElementById("pronoun-form-id"));
+const pronounAddButton = /** @type {HTMLButtonElement} */ (document.getElementById("pronoun-add-button"));
+
+/**
+ * @param {string} name
+ * @returns {HTMLInputElement}
+ */
+function pronounField(name) {
+    return /** @type {HTMLInputElement} */ (pronounForm.elements.namedItem(name));
+}
 
 let currentCharacterId = null;
 let lastFetchedCharacter = null;
@@ -27,14 +37,141 @@ function formatPronoun(pronoun) {
     return pronoun.is_primary ? `${base} (primary)` : base;
 }
 
-function renderPronounsIntoView(pronouns) {
-    const view = element.querySelector(".modal-view");
-    const dt = document.createElement("dt");
-    dt.textContent = "Pronouns";
-    const dd = document.createElement("dd");
-    dd.textContent = pronouns.length ? pronouns.map(formatPronoun).join(", ") : "None set";
-    view.appendChild(dt);
-    view.appendChild(dd);
+/**
+ * @param {any} pronoun
+ * @returns {HTMLLIElement}
+ */
+function buildPronounItem(pronoun) {
+    const item = document.createElement("li");
+
+    const label = document.createElement("span");
+    label.textContent = formatPronoun(pronoun);
+    item.appendChild(label);
+
+    const editButton = document.createElement("button");
+    editButton.type = "button";
+    editButton.textContent = "Edit";
+    editButton.addEventListener("click", () => openPronounForm(pronoun));
+    item.appendChild(editButton);
+
+    const deleteButton = document.createElement("button");
+    deleteButton.type = "button";
+    deleteButton.textContent = "Delete";
+    deleteButton.addEventListener("click", () => deletePronoun(pronoun.id));
+    item.appendChild(deleteButton);
+
+    if (!pronoun.is_primary) {
+        const primaryButton = document.createElement("button");
+        primaryButton.type = "button";
+        primaryButton.textContent = "Set primary";
+        primaryButton.addEventListener("click", () => setPronounPrimary(pronoun.id));
+        item.appendChild(primaryButton);
+    }
+
+    return item;
+}
+
+/**
+ * @param {any[]} pronounList
+ * @returns {void}
+ */
+function renderPronouns(pronounList) {
+    const list = document.getElementById("pronoun-list");
+    list.innerHTML = "";
+    for (const pronoun of pronounList) {
+        list.appendChild(buildPronounItem(pronoun));
+    }
+}
+
+/**
+ * @returns {Promise<void>}
+ */
+async function refreshPronouns() {
+    if (!currentCharacterId) return;
+    renderPronouns(await pronounsApi.listForCharacter(currentCharacterId));
+}
+
+/**
+ * @param {string|number} id
+ * @returns {Promise<void>}
+ */
+async function deletePronoun(id) {
+    if (!confirm("Delete this pronoun set?")) return;
+    await pronounsApi.remove(id);
+    await refreshPronouns();
+}
+
+/**
+ * Note: the backend doesn't enforce "only one primary pronoun set per
+ * character" (PronounService is a thin pass-through), so this can leave
+ * multiple rows marked primary — a known gap, not something to fake here.
+ * @param {string|number} id
+ * @returns {Promise<void>}
+ */
+async function setPronounPrimary(id) {
+    await pronounsApi.update(id, { is_primary: true });
+    await refreshPronouns();
+}
+
+/**
+ * @param {any|null} pronoun - Existing pronoun set to edit, or null to add a new one
+ * @returns {void}
+ */
+function openPronounForm(pronoun) {
+    pronounFormId.value = pronoun?.id ?? "";
+    pronounField("subject").value = pronoun?.subject ?? "";
+    pronounField("object").value = pronoun?.object ?? "";
+    pronounField("possessive").value = pronoun?.possessive ?? "";
+    pronounField("possessive_determiner").value = pronoun?.possessive_determiner ?? "";
+    pronounField("reflexive").value = pronoun?.reflexive ?? "";
+    pronounField("is_primary").checked = pronoun?.is_primary ?? false;
+    document.getElementById("pronoun-form-error").textContent = "";
+
+    pronounForm.hidden = false;
+    pronounAddButton.hidden = true;
+}
+
+/**
+ * @returns {void}
+ */
+function closePronounForm() {
+    pronounForm.reset();
+    pronounForm.hidden = true;
+    pronounAddButton.hidden = false;
+}
+
+/**
+ * @param {SubmitEvent} event
+ * @returns {Promise<void>}
+ */
+async function handlePronounSubmit(event) {
+    event.preventDefault();
+    if (!currentCharacterId) return;
+
+    const formError = document.getElementById("pronoun-form-error");
+    formError.textContent = "";
+
+    const values = {
+        subject: pronounField("subject").value,
+        object: pronounField("object").value,
+        possessive: pronounField("possessive").value,
+        possessive_determiner: pronounField("possessive_determiner").value,
+        reflexive: pronounField("reflexive").value,
+        is_primary: pronounField("is_primary").checked,
+    };
+
+    const id = pronounFormId.value;
+    const response = id
+        ? await pronounsApi.update(id, values)
+        : await pronounsApi.create({ character_id: currentCharacterId, ...values });
+
+    if (!response.ok) {
+        formError.textContent = await errorMessageFrom(response, "Save failed.");
+        return;
+    }
+
+    closePronounForm();
+    await refreshPronouns();
 }
 
 function renderCoverImage(images) {
@@ -135,8 +272,8 @@ async function handleUploadSubmit(event) {
 export async function openCharacterModal(id) {
     currentCharacterId = id;
     lastFetchedCharacter = await modal.openView(id);
-    const pronouns = await pronounsApi.listForCharacter(id);
-    renderPronounsIntoView(pronouns);
+    closePronounForm();
+    await refreshPronouns();
     await refreshGallery();
 }
 
@@ -155,3 +292,6 @@ element.querySelector(".modal-close").addEventListener("click", modal.close);
 element.querySelector(".modal-edit").addEventListener("click", () => modal.enterEdit(lastFetchedCharacter));
 element.querySelector(".modal-cancel").addEventListener("click", () => modal.cancelEdit(lastFetchedCharacter));
 uploadForm.addEventListener("submit", handleUploadSubmit);
+pronounAddButton.addEventListener("click", () => openPronounForm(null));
+document.getElementById("pronoun-form-cancel").addEventListener("click", closePronounForm);
+pronounForm.addEventListener("submit", handlePronounSubmit);
