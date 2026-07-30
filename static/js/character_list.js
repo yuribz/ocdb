@@ -1,6 +1,12 @@
+// @ts-check
+
 import { characters as charactersApi } from "./api.js";
 import { openCharacterModal } from "./character_entity.js";
 
+/**
+ * Fetch all characters and render them to the character list.
+ * @returns {Promise<void>}
+ */
 export async function loadCharacters() {
     const characters = await charactersApi.list();
 

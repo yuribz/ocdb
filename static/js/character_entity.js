@@ -1,8 +1,11 @@
+// @ts-check
+
 import { characters, images as imagesApi, pronouns as pronounsApi } from "./api.js";
 import { createEntityModal } from "./modal.js";
 import { characterSchema } from "./entity_schemas.js";
 import { loadCharacters } from "./character_list.js";
 
+/** @type {HTMLElement} */
 const element = document.getElementById("character-modal");
 const uploadForm = document.getElementById("upload-form");
 
@@ -122,6 +125,11 @@ async function handleUploadSubmit(event) {
     await refreshGallery();
 }
 
+/**
+ * Open modal in view mode for an existing character.
+ * @param {string|number} id - Character ID
+ * @returns {Promise<void>}
+ */
 export async function openCharacterModal(id) {
     currentCharacterId = id;
     lastFetchedCharacter = await modal.openView(id);
@@ -130,6 +138,10 @@ export async function openCharacterModal(id) {
     await refreshGallery();
 }
 
+/**
+ * Open modal in create mode for a new character.
+ * @returns {void}
+ */
 export function openNewCharacterModal() {
     currentCharacterId = null;
     modal.openCreate();

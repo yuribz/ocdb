@@ -1,3 +1,22 @@
+// @ts-check
+
+/**
+ * @typedef {Object} ModalController
+ * @property {() => void} open
+ * @property {() => void} close
+ * @property {() => void} edit
+ * @property {() => void} endEditing
+ * @property {() => void} creating
+ * @property {() => void} endCreating
+ */
+
+/**
+ * Initialize a modal element with basic open/close/state logic.
+ * @param {HTMLElement} element - The modal element
+ * @param {Object} [opts]
+ * @param {() => void} [opts.onClose] - Callback when modal closes
+ * @returns {ModalController}
+ */
 export function initModal(element, { onClose } = {}) {
     function close() {
         element.hidden = true;
@@ -35,6 +54,10 @@ export function initModal(element, { onClose } = {}) {
     return { open, close, edit, endEditing, creating, endCreating };
 }
 
+/**
+ * @param {HTMLElement} root
+ * @returns {Object} {title: HTMLElement, view: HTMLElement, form: HTMLFormElement, formFields: HTMLElement, formError: HTMLElement}
+ */
 function queryModalElements(root) {
     return {
         title: root.querySelector(".modal-title"),
@@ -45,19 +68,44 @@ function queryModalElements(root) {
     };
 }
 
+/**
+ * Extract error message from a response.
+ * @param {Response} response
+ * @returns {Promise<Error>}
+ */
 async function errorFromResponse(response) {
     const body = await response.json().catch(() => ({}));
     return new Error(body.error ?? "Save failed.");
 }
 
+/**
+ * Generate a unique input ID for a field.
+ * @param {HTMLElement} root - Modal element
+ * @param {string} key - Field key
+ * @returns {string}
+ */
 function inputIdFor(root, key) {
     return `${root.id}-field-${key}`;
 }
 
-// A single reusable controller for an entity's view/edit/create modal, driven
-// entirely by a field schema. Knows nothing about entity-specific extras
-// (e.g. a character's image gallery or pronoun list) — those stay in the
-// caller, layered on top of openView()'s returned data.
+/**
+ * @typedef {Object} EntityModalController
+ * @property {(id: string|number) => Promise<any>} openView - Load and display entity
+ * @property {() => void} openCreate - Initialize create mode
+ * @property {(data: any) => void} enterEdit - Enter edit mode with data
+ * @property {(viewData?: any) => void} cancelEdit - Exit edit mode
+ * @property {() => void} close - Close modal
+ */
+
+/**
+ * Generic schema-driven modal controller for view/edit/create workflows.
+ * @param {Object} opts
+ * @param {HTMLElement} opts.element - Modal element
+ * @param {import('./entity_schemas.js').Schema} opts.schema - Entity schema
+ * @param {import('./api.js').EntityClient} opts.client - Entity API client
+ * @param {(data?: any) => void} [opts.onSaved] - Callback after save
+ * @returns {EntityModalController}
+ */
 export function createEntityModal({ element, schema, client, onSaved }) {
     const modalCtl = initModal(element);
     const els = queryModalElements(element);
