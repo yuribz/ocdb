@@ -1,5 +1,7 @@
 // @ts-check
 
+import { errorMessageFrom } from "./api.js";
+
 /**
  * @typedef {Object} ModalController
  * @property {() => void} open
@@ -74,8 +76,7 @@ function queryModalElements(root) {
  * @returns {Promise<Error>}
  */
 async function errorFromResponse(response) {
-    const body = await response.json().catch(() => ({}));
-    return new Error(body.error ?? "Save failed.");
+    return new Error(await errorMessageFrom(response, "Save failed."));
 }
 
 /**
@@ -200,6 +201,7 @@ export function createEntityModal({ element, schema, client, onSaved }) {
         modalCtl.endEditing();
         modalCtl.endCreating();
         if (viewData) renderView(viewData);
+        else modalCtl.close();
     }
 
     async function handleSubmit(event) {

@@ -1,6 +1,6 @@
 // @ts-check
 
-import { characters, images as imagesApi, pronouns as pronounsApi } from "./api.js";
+import { characters, images as imagesApi, pronouns as pronounsApi, errorMessageFrom } from "./api.js";
 import { createEntityModal } from "./modal.js";
 import { characterSchema } from "./entity_schemas.js";
 import { loadCharacters } from "./character_list.js";
@@ -50,40 +50,43 @@ function renderCoverImage(images) {
     coverContainer.appendChild(img);
 }
 
+function buildGalleryItem(image) {
+    const figure = document.createElement("figure");
+    figure.className = "gallery-item";
+
+    const img = document.createElement("img");
+    img.src = image.url;
+    img.alt = image.caption ?? "";
+    figure.appendChild(img);
+
+    if (image.is_primary) {
+        const badge = document.createElement("span");
+        badge.className = "gallery-primary-badge";
+        badge.textContent = "★ cover";
+        figure.appendChild(badge);
+    }
+
+    if (image.caption) {
+        const caption = document.createElement("figcaption");
+        caption.textContent = image.caption;
+        figure.appendChild(caption);
+    }
+
+    const deleteButton = document.createElement("button");
+    deleteButton.type = "button";
+    deleteButton.className = "gallery-delete";
+    deleteButton.textContent = "Delete";
+    deleteButton.addEventListener("click", () => deleteImage(image.link_id));
+    figure.appendChild(deleteButton);
+
+    return figure;
+}
+
 function renderGallery(images) {
     const gallery = document.getElementById("modal-image-gallery");
     gallery.innerHTML = "";
-
     for (const image of images) {
-        const figure = document.createElement("figure");
-        figure.className = "gallery-item";
-
-        const img = document.createElement("img");
-        img.src = image.url;
-        img.alt = image.caption ?? "";
-        figure.appendChild(img);
-
-        if (image.is_primary) {
-            const badge = document.createElement("span");
-            badge.className = "gallery-primary-badge";
-            badge.textContent = "★ cover";
-            figure.appendChild(badge);
-        }
-
-        if (image.caption) {
-            const caption = document.createElement("figcaption");
-            caption.textContent = image.caption;
-            figure.appendChild(caption);
-        }
-
-        const deleteButton = document.createElement("button");
-        deleteButton.type = "button";
-        deleteButton.className = "gallery-delete";
-        deleteButton.textContent = "Delete";
-        deleteButton.addEventListener("click", () => deleteImage(image.link_id));
-        figure.appendChild(deleteButton);
-
-        gallery.appendChild(figure);
+        gallery.appendChild(buildGalleryItem(image));
     }
 }
 
@@ -116,8 +119,7 @@ async function handleUploadSubmit(event) {
     const response = await imagesApi.upload(currentCharacterId, new FormData(form));
 
     if (!response.ok) {
-        const body = await response.json().catch(() => ({}));
-        uploadError.textContent = body.error ?? "Upload failed.";
+        uploadError.textContent = await errorMessageFrom(response, "Upload failed.");
         return;
     }
 
@@ -144,6 +146,7 @@ export async function openCharacterModal(id) {
  */
 export function openNewCharacterModal() {
     currentCharacterId = null;
+    lastFetchedCharacter = null;
     modal.openCreate();
 }
 
