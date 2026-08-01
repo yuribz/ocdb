@@ -30,14 +30,24 @@
 
         <section id="characters">
             <h2>Characters</h2>
-            <ul id="character-list" style="list-style-type: none; padding: 0;"></ul>
-            <button type="button" id="new-character-button">+ New Character</button>
+            <input type="search" id="character-search" class="search-input"
+                   placeholder="Search characters..." aria-label="Search characters" />
+            <ul id="character-list" class="entity-list"></ul>
+            <p id="character-empty-state" class="empty-state" hidden>
+                No characters yet — add your first OC!
+            </p>
+            <button type="button" id="new-character-button" class="btn">+ New Character</button>
         </section>
 
         <section id="places">
             <h2>Places</h2>
-            <ul id="place-list" style="list-style-type: none; padding: 0;"></ul>
-            <button type="button" id="new-place-button">+ New Place</button>
+            <input type="search" id="place-search" class="search-input"
+                   placeholder="Search places..." aria-label="Search places" />
+            <ul id="place-list" class="entity-list"></ul>
+            <p id="place-empty-state" class="empty-state" hidden>
+                No places yet — add your first location!
+            </p>
+            <button type="button" id="new-place-button" class="btn">+ New Place</button>
         </section>
     </div>
 
@@ -48,13 +58,23 @@
         <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="character-modal-title">
 
             <!-- Buttons at the top -->
-            <button type="button" class="modal-edit" aria-label="Edit">Edit</button>
+            <button type="button" class="modal-edit btn" aria-label="Edit">Edit</button>
             <button type="button" class="modal-close" aria-label="Close">&times;</button>
 
             <!-- View mode -->
             <h2 class="modal-title" id="character-modal-title"></h2>
             <div class="cover-image modal-cover-image"></div>
             <dl class="modal-view"></dl>
+
+            <!-- Edit / create mode -->
+            <form class="modal-form">
+                <div class="modal-form-fields"></div>
+                <div class="modal-form-actions">
+                    <button type="submit" class="btn btn-primary">Save</button>
+                    <button type="button" class="modal-cancel btn">Cancel</button>
+                </div>
+                <p class="modal-form-error upload-error"></p>
+            </form>
 
             <!-- Pronoun sets are a character sub-resource (character_id FK),
                  not their own top-level entity, so they're managed inline
@@ -84,21 +104,13 @@
                         <input type="checkbox" id="pronoun-is_primary" name="is_primary" />
                         Primary
                     </label>
-                    <button type="submit">Save pronoun set</button>
-                    <button type="button" id="pronoun-form-cancel">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save pronoun set</button>
+                    <button type="button" id="pronoun-form-cancel" class="btn">Cancel</button>
                     <p id="pronoun-form-error" class="upload-error"></p>
                 </form>
 
-                <button type="button" id="pronoun-add-button">+ Add pronoun set</button>
+                <button type="button" id="pronoun-add-button" class="btn">+ Add pronoun set</button>
             </section>
-
-            <!-- Edit / create mode -->
-            <form class="modal-form">
-                <div class="modal-form-fields"></div>
-                <button type="submit">Save</button>
-                <button type="button" class="modal-cancel">Cancel</button>
-                <p class="modal-form-error upload-error"></p>
-            </form>
 
             <section class="modal-gallery-section">
                 <h3>Gallery</h3>
@@ -117,7 +129,7 @@
                         Set as cover image
                     </label>
 
-                    <button type="submit">Upload</button>
+                    <button type="submit" class="btn btn-primary">Upload</button>
                     <p id="upload-error" class="upload-error"></p>
                 </form>
             </section>
@@ -129,7 +141,7 @@
     <div id="place-modal" class="modal-overlay" hidden>
         <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="place-modal-title">
 
-            <button type="button" class="modal-edit" aria-label="Edit">Edit</button>
+            <button type="button" class="modal-edit btn" aria-label="Edit">Edit</button>
             <button type="button" class="modal-close" aria-label="Close">&times;</button>
 
             <h2 class="modal-title" id="place-modal-title"></h2>
@@ -137,10 +149,26 @@
 
             <form class="modal-form">
                 <div class="modal-form-fields"></div>
-                <button type="submit">Save</button>
-                <button type="button" class="modal-cancel">Cancel</button>
+                <div class="modal-form-actions">
+                    <button type="submit" class="btn btn-primary">Save</button>
+                    <button type="button" class="modal-cancel btn">Cancel</button>
+                </div>
                 <p class="modal-form-error upload-error"></p>
             </form>
+        </div>
+    </div>
+
+    <!-- Toasts are appended/removed here at runtime by js/toast.js. -->
+    <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+    <!-- Full-size viewer for a clicked gallery thumbnail. Same
+         overlay/Escape-to-close pattern as the entity modals (see
+         initModal in modal.js), driven by js/lightbox.js. -->
+    <div id="image-lightbox" class="lightbox-overlay" hidden>
+        <div class="lightbox-box">
+            <button type="button" class="lightbox-close" aria-label="Close">&times;</button>
+            <img class="lightbox-image" src="" alt="" />
+            <p class="lightbox-caption"></p>
         </div>
     </div>
 

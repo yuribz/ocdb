@@ -4,6 +4,8 @@ import { characters, images as imagesApi, pronouns as pronounsApi, errorMessageF
 import { createEntityModal } from "./modal.js";
 import { characterSchema } from "./entity_schemas.js";
 import { loadCharacters } from "./character_list.js";
+import { showToast } from "./toast.js";
+import { openLightbox } from "./lightbox.js";
 
 const element = /** @type {HTMLElement} */ (document.getElementById("character-modal"));
 const uploadForm = /** @type {HTMLFormElement} */ (document.getElementById("upload-form"));
@@ -29,6 +31,7 @@ const modal = createEntityModal({
     onSaved: (fresh) => {
         if (fresh) lastFetchedCharacter = fresh;
         loadCharacters();
+        showToast(fresh ? "Character updated." : "Character created.");
     },
 });
 
@@ -99,6 +102,7 @@ async function deletePronoun(id) {
     if (!confirm("Delete this pronoun set?")) return;
     await pronounsApi.remove(id);
     await refreshPronouns();
+    showToast("Pronoun set deleted.");
 }
 
 /**
@@ -172,6 +176,7 @@ async function handlePronounSubmit(event) {
 
     closePronounForm();
     await refreshPronouns();
+    showToast(id ? "Pronoun set updated." : "Pronoun set added.");
 }
 
 function renderCoverImage(images) {
@@ -194,6 +199,9 @@ function buildGalleryItem(image) {
     const img = document.createElement("img");
     img.src = image.url;
     img.alt = image.caption ?? "";
+    img.tabIndex = 0;
+    img.style.cursor = "zoom-in";
+    img.addEventListener("click", () => openLightbox(image.url, image.caption ?? ""));
     figure.appendChild(img);
 
     if (image.is_primary) {
@@ -243,6 +251,7 @@ async function deleteImage(linkId) {
     }
     await imagesApi.deleteLink(linkId);
     await refreshGallery();
+    showToast("Image removed.");
 }
 
 async function handleUploadSubmit(event) {
@@ -262,6 +271,7 @@ async function handleUploadSubmit(event) {
 
     form.reset();
     await refreshGallery();
+    showToast("Image uploaded.");
 }
 
 /**
@@ -289,8 +299,14 @@ export function openNewCharacterModal() {
 
 document.getElementById("new-character-button").addEventListener("click", openNewCharacterModal);
 element.querySelector(".modal-close").addEventListener("click", modal.close);
-element.querySelector(".modal-edit").addEventListener("click", () => modal.enterEdit(lastFetchedCharacter));
-element.querySelector(".modal-cancel").addEventListener("click", () => modal.cancelEdit(lastFetchedCharacter));
+element.querySelector(".modal-edit").addEventListener("click", () => {
+    closePronounForm();
+    modal.enterEdit(lastFetchedCharacter);
+});
+element.querySelector(".modal-cancel").addEventListener("click", () => {
+    closePronounForm();
+    modal.cancelEdit(lastFetchedCharacter);
+});
 uploadForm.addEventListener("submit", handleUploadSubmit);
 pronounAddButton.addEventListener("click", () => openPronounForm(null));
 document.getElementById("pronoun-form-cancel").addEventListener("click", closePronounForm);

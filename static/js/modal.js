@@ -96,6 +96,10 @@ function inputIdFor(root, key) {
  */
 
 /**
+ * @typedef {"view"|"create"|"edit"} ModalMode
+ */
+
+/**
  * @typedef {Object} EntityModalController
  * @property {(id: string|number) => Promise<any>} openView - Load and display entity
  * @property {() => Promise<void>} openCreate - Initialize create mode
@@ -120,6 +124,7 @@ export function createEntityModal({ element, schema, client, onSaved }) {
     const modalCtl = initModal(element);
     const els = queryModalElements(element);
 
+    /** @type {ModalMode} */
     let mode = "view";
     let currentId = null;
 
