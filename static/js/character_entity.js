@@ -299,8 +299,14 @@ export function openNewCharacterModal() {
 
 document.getElementById("new-character-button").addEventListener("click", openNewCharacterModal);
 element.querySelector(".modal-close").addEventListener("click", modal.close);
-element.querySelector(".modal-edit").addEventListener("click", () => modal.enterEdit(lastFetchedCharacter));
-element.querySelector(".modal-cancel").addEventListener("click", () => modal.cancelEdit(lastFetchedCharacter));
+element.querySelector(".modal-edit").addEventListener("click", () => {
+    closePronounForm();
+    modal.enterEdit(lastFetchedCharacter);
+});
+element.querySelector(".modal-cancel").addEventListener("click", () => {
+    closePronounForm();
+    modal.cancelEdit(lastFetchedCharacter);
+});
 uploadForm.addEventListener("submit", handleUploadSubmit);
 pronounAddButton.addEventListener("click", () => openPronounForm(null));
 document.getElementById("pronoun-form-cancel").addEventListener("click", closePronounForm);

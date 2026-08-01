@@ -173,15 +173,39 @@ pre {
   color: var(--accent);
 }
 
-#new-character-button {
+/* --- Buttons -------------------------------------------------------------
+   Shared shape for every button in the app: sharp corners, accent-colored
+   border, no native browser chrome. .btn is the outlined/secondary style;
+   add .btn-primary for the filled, accent-background variant. */
+
+.btn {
   background: none;
   border: 2px solid var(--accent);
   border-radius: 0;
   color: var(--fg);
   cursor: pointer;
   font-family: inherit;
-  margin-top: 0.5rem;
+  font-size: 1rem;
   padding: 0.3rem 0.6rem;
+}
+
+.btn:hover {
+  background-color: var(--accent);
+  color: var(--box-bg);
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: var(--box-bg);
+}
+
+.btn-primary:hover {
+  opacity: 0.85;
+}
+
+#new-character-button,
+#new-place-button {
+  margin-top: 0.5rem;
 }
 
 .modal-overlay {
@@ -237,7 +261,7 @@ pre {
 .modal-form {
   display: none;
   flex-direction: column;
-  gap: 0.4rem;
+  gap: 1.25rem;
   text-align: left;
 }
 
@@ -247,7 +271,16 @@ pre {
 .modal-form-fields {
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
+  gap: 1rem;
+}
+
+.modal-form-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.modal-form-actions button {
+  padding: 0.5rem 1rem;
 }
 
 .cover-image {
@@ -337,15 +370,61 @@ pre {
 .pronoun-form {
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
+  gap: 1rem;
   text-align: left;
+}
+
+.pronoun-form[hidden] {
+  display: none;
 }
 
 .upload-form label,
 .pronoun-form label,
 .modal-form-fields label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
   font-weight: bold;
   color: var(--accent);
+}
+
+.upload-form label:has(input[type="checkbox"]),
+.pronoun-form label:has(input[type="checkbox"]) {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.upload-form input:not([type="checkbox"]),
+.upload-form select,
+.pronoun-form input:not([type="checkbox"]),
+.pronoun-form select,
+.modal-form-fields input:not([type="checkbox"]),
+.modal-form-fields select,
+.modal-form-fields textarea {
+  font-family: inherit;
+  font-size: 1rem;
+  color: var(--fg);
+  background-color: var(--bg);
+  border: 3px solid var(--accent);
+  border-radius: 0;
+  padding: 0.5rem 0.6rem;
+}
+
+.upload-form input:focus,
+.upload-form select:focus,
+.pronoun-form input:focus,
+.pronoun-form select:focus,
+.modal-form-fields input:focus,
+.modal-form-fields select:focus,
+.modal-form-fields textarea:focus {
+  outline: 3px solid var(--link);
+  outline-offset: 1px;
+}
+
+.modal-form-fields textarea {
+  min-height: 5rem;
+  resize: vertical;
 }
 
 .upload-error {
