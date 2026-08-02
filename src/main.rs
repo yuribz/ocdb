@@ -4,6 +4,7 @@ mod error;
 mod models;
 mod repositories;
 mod routes;
+mod schemes;
 mod services;
 mod state;
 mod storage;

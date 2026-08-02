@@ -3,7 +3,8 @@
 use uuid::Uuid;
 
 use crate::db::DbPool;
-use crate::models::character::{Character, NewCharacter, UpdateCharacter};
+use crate::models::character::{Character};
+use crate::schemes::character::{NewCharacter, UpdateCharacter};
 
 pub struct CharacterRepository<'a> {
     pool: &'a DbPool,
